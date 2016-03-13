@@ -7,9 +7,12 @@ Smopy returns an OpenStreetMap tile image!
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
+import os.path
+import tempfile
+
 import math
 from six import BytesIO
-from six.moves.urllib.request import urlopen
+from six.moves.urllib.request import urlretrieve
 
 from PIL import Image
 import numpy as np
@@ -38,9 +41,11 @@ def fetch_tile(x, y, z):
     Return a PIL image.
 
     """
-    url = get_url(x,y,z)
-    png = BytesIO(urlopen(url).read())
-    img = Image.open(png)
+    file_path = os.path.join(tempfile.gettempdir(), 'smopy_cache_{}_{}_{}.png'.format(x, y, z))
+    if not os.path.exists(file_path):
+        url = get_url(x,y,z)
+        urlretrieve(url, file_path)
+    img = Image.open(file_path)
     img.load()
     return img
 
